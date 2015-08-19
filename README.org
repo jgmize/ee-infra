@@ -1,0 +1,29 @@
+* Mozilla Engagement Engineering Infrastructure
+- Unofficial, incomplete docs and notes
+- Official docs include security-sensitive info and cannot be public
+* Current status
+- New AWS account active
+  - Dedicated to EE infra, billed to EE
+  - Admin privileges to be shared between EE, IT, and EY
+- Premium support contract signed and active with Engine Yard
+- moz.works domain registered via route53
+- SSL certs requested for *.us-east.moz.works & *.eu-west.moz.works
+  - https://bugzilla.mozilla.org/show_bug.cgi?id=1195875
+  - wildcard certs require opsec approval, but hopefully we can get that quickly
+  - Need to terminate SSL at ELBs for performance and client support reasons
+    - this will require multiple ELBs per cluster
+    - Older clients such as ie8 and below on XP do not support SNI
+- Tentatively scheduled to build 2 new clusters Thursday from 2-4 PM CDT
+  - each cluster will consist of 2 autoscaling groups
+    - 5 node fixed-size running both control and data planes
+    - separate data-plane only autoscaling group
+      - manually scaled to 0 instances under "normal" operations
+      - separate group will be for load testing and DDoS mitigation purposes
+  - will use kubernetes in one cluster (us-east), fleet in the other (eu-central)
+    - this allows us to evaluate the tradeoffs of each scheduler based on actual deployments
+  - neither cluster will use ceph
+    - use HPV instead of PV instances
+    - configure S3 buckets and RDS DBs
+  - bastion host in each VPC for ssh access
+  - jenkins master in us-east
+    - artifacts + job state in EBS for failure recovery
